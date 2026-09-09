@@ -1,122 +1,144 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+
+  const sendMessage = (text = input) => {
+    if (!text.trim()) return;
+  
+    setMessages([
+      ...messages,
+      { role: "user", text: text },
+    ]);
+  
+    setInput("");
+    setIsThinking(true);
+  
+    setTimeout(() => {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          role: "assistant",
+          text: "I received your request. Once the backend is connected, I’ll fetch the relevant government data for you.",
+        },
+      ]);
+  
+      setIsThinking(false);
+    }, 1000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <div className="app">
+      <header className="header">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+          <h1>JanData Nexus</h1>
+          <p>Government Data Access & AI Chatbot</p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
+      <main className="chat-container">
+        {messages.length === 0 ? (
+          <div className="welcome">
+            <div className="welcome-icon">🇮🇳</div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+            <h2>How can I help you today?</h2>
+
+            <p>
+              Ask JanData Nexus for government data, statistics, reports,
+              comparisons, or insights.
+            </p>
+
+            <div className="suggestions">
+              <button
+                onClick={() =>
+                  sendMessage(
+                    "What is the paddy production in Dakshina Kannada in 2026?"
+                  )
+                }
+              >
+                🌾 Paddy production in Dakshina Kannada
+              </button>
+
+              <button
+                onClick={() =>
+                  sendMessage(
+                    "Compare school enrollment and unemployment across districts."
+                  )
+                }
+              >
+                📊 Compare district statistics
+              </button>
+
+              <button
+                onClick={() =>
+                  sendMessage(
+                    "Give me the latest government report on agriculture."
+                  )
+                }
+              >
+                📄 Find an agriculture report
+              </button>
+
+              <button
+                onClick={() =>
+                  sendMessage(
+                    "Give me the requested government data in Excel format."
+                  )
+                }
+              >
+                📥 Get data in Excel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="messages">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`message ${
+                  message.role === "user"
+                    ? "user-message"
+                    : "assistant-message"
+                }`}
+              >
+                <div className="message-label">
+                  {message.role === "user" ? "You" : "JanData Nexus"}
+                </div>
+
+                <div className="message-text">{message.text}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {isThinking && (
+          <div className="message assistant-message">
+            <div className="message-label">JanData Nexus</div>
+            <div className="message-text">I'm fetching the data for you...</div>
+          </div>
+        )}
+        <div className="input-area">
+          <input
+            type="text"
+            placeholder="Ask for government data..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+
+          <button onClick={() => sendMessage()}>Send</button>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
