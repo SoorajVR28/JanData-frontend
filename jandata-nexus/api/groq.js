@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, model = 'llama-3.3-70b-versatile', temperature = 0.1, response_format } = req.body || {};
+    const { messages, model = 'groq/compound', temperature = 0.1, response_format } = req.body || {};
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Invalid or missing "messages" array in request body.' });

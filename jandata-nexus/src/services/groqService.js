@@ -12,16 +12,21 @@ const GROQ_SERVERLESS_ENDPOINT = import.meta.env.VITE_GROQ_SERVERLESS_URL || '/a
 export async function callGroqServerless(messages, options = {}) {
   const payload = {
     messages,
-    model: options.model || 'llama-3.3-70b-versatile',
+    model: options.model || 'openai/gpt-oss-20b',
     temperature: options.temperature ?? 0.1,
     response_format: options.response_format,
   };
 
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const headers = { 'Content-Type': 'application/json' };
+  if (anonKey && GROQ_SERVERLESS_ENDPOINT.startsWith('http')) {
+    headers.apikey = anonKey;
+    headers.Authorization = `Bearer ${anonKey}`;
+  }
+
   const response = await fetch(GROQ_SERVERLESS_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -30,7 +35,9 @@ export async function callGroqServerless(messages, options = {}) {
     try {
       const errData = await response.json();
       if (errData.error) errMessage += `: ${errData.error}`;
-    } catch (_) {}
+    } catch {
+      // Preserve the HTTP status when the error body is not JSON.
+    }
     throw new Error(errMessage);
   }
 
@@ -62,7 +69,7 @@ export async function parseNaturalLanguageToQuery(userQuestion) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
 
-    const queryObj = JSON.parse(cleanedText);
+    const queryObj = normalizeTranslatedQuery(JSON.parse(cleanedText));
     const validation = validateJanDataQuery(queryObj);
 
     if (!validation.valid) {
@@ -74,6 +81,28 @@ export async function parseNaturalLanguageToQuery(userQuestion) {
     console.error('[Groq Query Parser Error]:', err);
     return { valid: false, query: null, error: err.message };
   }
+}
+
+function normalizeTranslatedQuery(queryObj) {
+  if (!queryObj || typeof queryObj !== 'object') return queryObj;
+
+  if (typeof queryObj.entity === 'string') {
+    queryObj.entity = { name: queryObj.entity, type: queryObj.entity_type || 'district' };
+  }
+
+  if (typeof queryObj.indicator === 'string') {
+    queryObj.indicator = queryObj.indicator.trim().toLowerCase().replace(/\s+/g, '_');
+  }
+
+  if (Array.isArray(queryObj.indicators)) {
+    queryObj.indicators = queryObj.indicators.map((indicator) =>
+      typeof indicator === 'string'
+        ? indicator.trim().toLowerCase().replace(/\s+/g, '_')
+        : indicator
+    );
+  }
+
+  return queryObj;
 }
 
 /**

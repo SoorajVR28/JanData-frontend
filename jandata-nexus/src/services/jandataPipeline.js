@@ -3,7 +3,7 @@ import { executeJanDataQuery } from './supabaseQueryEngine.js';
 
 /**
  * Executes the complete JanData Nexus Query & Retrieval Pipeline:
- * User question → Groq Query Parser → Controlled JSON Query → Supabase Query Engine (RLS) → Structured Results + Provenance → Groq Synthesizer → Final Answer
+ * User question → Groq Query Translator → Controlled JSON Query → JanData backend → Structured Results + Provenance → Groq Synthesizer → Final Answer
  * 
  * @param {string} userQuestion - The natural-language question asked by the user.
  * @returns {Promise<{
@@ -37,7 +37,7 @@ export async function runJanDataPipeline(userQuestion) {
 
     const controlledQuery = parseResult.query;
 
-    // Step 2: Controlled JSON Query → Supabase Direct Database Retrieval (RLS)
+    // Step 2: Controlled JSON Query → backend retrieval and joins
     const dbResults = await executeJanDataQuery(controlledQuery);
 
     if (!dbResults.success) {
@@ -46,7 +46,7 @@ export async function runJanDataPipeline(userQuestion) {
         userQuestion,
         controlledQuery,
         dbResults: dbResults,
-        answer: `Database query execution failed: ${dbResults.error}`,
+        answer: `JanData backend query failed: ${dbResults.error}`,
         executionTimeMs: Date.now() - startTime,
         error: dbResults.error,
       };

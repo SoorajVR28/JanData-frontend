@@ -2,14 +2,22 @@
 // Deployed via: supabase functions deploy groq-chat
 // Set key via: supabase secrets set GROQ_API_KEY=your_key_here
 
+// The Deno extension resolves this remote import in Supabase Edge Functions.
+// @ts-ignore: The regular VS Code TypeScript service cannot resolve Deno URLs.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+declare const Deno: {
+  env: {
+    get(name: string): string | undefined;
+  };
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -23,7 +31,7 @@ serve(async (req) => {
       );
     }
 
-    const { messages, model = "llama-3.3-70b-versatile", temperature = 0.1, response_format } = await req.json();
+    const { messages, model = "openai/gpt-oss-20b", temperature = 0.1, response_format } = await req.json();
 
     const groqPayload: Record<string, any> = {
       model,
