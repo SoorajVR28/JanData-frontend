@@ -12,16 +12,21 @@ const GROQ_SERVERLESS_ENDPOINT = import.meta.env.VITE_GROQ_SERVERLESS_URL || '/a
 export async function callGroqServerless(messages, options = {}) {
   const payload = {
     messages,
-    model: options.model || 'llama-3.3-70b-versatile',
+    model: options.model || 'groq/compound',
     temperature: options.temperature ?? 0.1,
     response_format: options.response_format,
   };
 
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const headers = { 'Content-Type': 'application/json' };
+  if (anonKey && GROQ_SERVERLESS_ENDPOINT.startsWith('http')) {
+    headers.apikey = anonKey;
+    headers.Authorization = `Bearer ${anonKey}`;
+  }
+
   const response = await fetch(GROQ_SERVERLESS_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -30,12 +35,39 @@ export async function callGroqServerless(messages, options = {}) {
     try {
       const errData = await response.json();
       if (errData.error) errMessage += `: ${errData.error}`;
-    } catch (_) {}
+    } catch {
+      // Preserve the HTTP status when the error body is not JSON.
+    }
     throw new Error(errMessage);
   }
 
   const result = await response.json();
   return result.content || result.choices?.[0]?.message?.content || '';
+}
+
+function extractJsonFromText(text) {
+  if (!text) throw new Error("Empty response from AI model.");
+  const cleaned = text.trim();
+
+  // Try extracting from markdown ```json ... ``` or ``` ... ``` block
+  const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonBlockMatch && jsonBlockMatch[1]) {
+    try {
+      return JSON.parse(jsonBlockMatch[1].trim());
+    } catch {}
+  }
+
+  // Find first '{' and last '}'
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const candidate = cleaned.slice(firstBrace, lastBrace + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch {}
+  }
+
+  return JSON.parse(cleaned);
 }
 
 /**
@@ -54,15 +86,8 @@ export async function parseNaturalLanguageToQuery(userQuestion) {
       { temperature: 0.0, response_format: { type: 'json_object' } }
     );
 
-    // Clean JSON markdown wrappers if present
-    let cleanedText = rawAiResponse.trim();
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const queryObj = JSON.parse(cleanedText);
+    const parsedJson = extractJsonFromText(rawAiResponse);
+    const queryObj = normalizeTranslatedQuery(parsedJson);
     const validation = validateJanDataQuery(queryObj);
 
     if (!validation.valid) {
@@ -74,6 +99,28 @@ export async function parseNaturalLanguageToQuery(userQuestion) {
     console.error('[Groq Query Parser Error]:', err);
     return { valid: false, query: null, error: err.message };
   }
+}
+
+function normalizeTranslatedQuery(queryObj) {
+  if (!queryObj || typeof queryObj !== 'object') return queryObj;
+
+  if (typeof queryObj.entity === 'string') {
+    queryObj.entity = { name: queryObj.entity, type: queryObj.entity_type || 'district' };
+  }
+
+  if (typeof queryObj.indicator === 'string') {
+    queryObj.indicator = queryObj.indicator.trim().toLowerCase().replace(/\s+/g, '_');
+  }
+
+  if (Array.isArray(queryObj.indicators)) {
+    queryObj.indicators = queryObj.indicators.map((indicator) =>
+      typeof indicator === 'string'
+        ? indicator.trim().toLowerCase().replace(/\s+/g, '_')
+        : indicator
+    );
+  }
+
+  return queryObj;
 }
 
 /**

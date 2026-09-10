@@ -1,0 +1,391 @@
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.dashboard-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 40px;
+  text-align: left;
+}
+
+.dashboard-header h1 {
+  font-size: 24px;
+  color: #1f2937;
+}
+
+.dashboard-header p {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.dashboard-panel {
+  width: 90%;
+  max-width: 900px;
+  margin: 30px auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.question-form {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.question-form label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.question-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.question-controls input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.question-controls button {
+  padding: 0 22px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.question-controls button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.answer-section {
+  padding: 18px;
+  border-left: 4px solid #2563eb;
+  background: #f8faff;
+}
+
+.answer-text {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.dashboard-demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.dashboard-button {
+  padding: 13px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.dashboard-button:hover {
+  background: #1d4ed8;
+}
+
+.dashboard-button-secondary {
+  padding: 8px 14px;
+  background: white;
+  color: #1f2937;
+  border: 1px solid #dbe1e8;
+  font-size: 14px;
+}
+
+.dashboard-button-secondary:hover {
+  border-color: #2563eb;
+  background: #f8faff;
+}
+
+.dashboard-state {
+  text-align: center;
+  padding: 60px 30px;
+}
+
+.dashboard-state-title {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.dashboard-state-text {
+  color: #6b7280;
+  max-width: 520px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+.dashboard-state-error .dashboard-state-title {
+  color: #b91c1c;
+}
+
+.dashboard-success {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  text-align: left;
+}
+
+.dashboard-section h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.dashboard-kicker {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.query-overview-question {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.query-overview-count {
+  display: inline-block;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.query-overview-note,
+.query-inspector-intro {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.query-inspector-list {
+  margin-top: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.query-inspector-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 34%) 1fr;
+  gap: 12px;
+  padding: 14px 17px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.query-inspector-row:last-child {
+  border-bottom: none;
+}
+
+.query-inspector-row:nth-child(even) {
+  background: #f8faff;
+}
+
+.query-inspector-row dt {
+  font-size: 13px;
+  font-weight: bold;
+  color: #6b7280;
+}
+
+.query-inspector-row dd {
+  font-size: 14px;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (min-width: 800px) {
+  .stat-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat-card {
+  padding: 16px 17px;
+  background: #f1f5f9;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.stat-card-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.stat-card-value {
+  font-size: 24px;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.stat-card-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    padding: 18px 20px;
+  }
+
+  .dashboard-panel {
+    width: calc(100% - 32px);
+    margin: 20px auto;
+    padding: 18px;
+  }
+
+  .query-inspector-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .stat-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .question-controls {
+    flex-direction: column;
+  }
+
+  .question-controls button {
+    min-height: 44px;
+  }
+}
+/* ================================
+   Data Visualization / Charts
+   ================================ */
+
+   .dashboard-section {
+    margin-top: 8px;
+  }
+  
+  .section-heading {
+    margin-bottom: 16px;
+  }
+  
+  .section-heading h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: #1f2937;
+  }
+  
+  .section-heading p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  
+  .chart-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    overflow: hidden;
+  }
+  
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  
+  .chart-header h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #1f2937;
+  }
+  
+  .muted-text {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .chart-unit {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .chart-container {
+    width: 100%;
+    min-height: 320px;
+  }
+  
+  /* Keep charts usable on smaller screens */
+  @media (max-width: 600px) {
+    .chart-card {
+      padding: 14px;
+    }
+  
+    .chart-header {
+      flex-direction: column;
+      gap: 8px;
+    }
+  
+    .chart-container {
+      min-height: 280px;
+    }
+  }

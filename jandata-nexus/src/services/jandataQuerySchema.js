@@ -100,6 +100,7 @@ Controlled JanData Query Schema also supports optional fields:
 - "period": string (e.g. "Kharif 2025-26")
 
 Always infer snake_case indicator names (e.g., "paddy_production", "groundwater_level", "school_enrollment", "unemployment_rate", "fully_immunized_children").
+Use dataset indicator names when the question contains a known measure. For rainfall questions, use "cumulative_rainfall_7d_actual" for cumulative seven-day rainfall, "cumulative_rainfall_july_est" for July estimated rainfall, and "cumulative_rainfall_tune_est" for June estimated rainfall. Do not shorten these to "rainfall".
 `;
 
 /**
@@ -109,6 +110,18 @@ Always infer snake_case indicator names (e.g., "paddy_production", "groundwater_
 export function validateJanDataQuery(queryObj) {
   if (!queryObj || typeof queryObj !== 'object') {
     return { valid: false, error: 'Query must be a non-null object' };
+  }
+
+  if (queryObj.time?.year !== undefined && !Number.isInteger(queryObj.time.year)) {
+    return { valid: false, error: 'time.year must be an integer' };
+  }
+
+  if (queryObj.year !== undefined && !Number.isInteger(queryObj.year)) {
+    return { valid: false, error: 'year must be an integer' };
+  }
+
+  if (queryObj.filters !== undefined && !Array.isArray(queryObj.filters)) {
+    return { valid: false, error: 'filters must be an array' };
   }
 
   const validIntents = [
@@ -139,10 +152,8 @@ export function validateJanDataQuery(queryObj) {
 
     case 'compare_indicators':
     case 'cross_indicator_query':
-      if (!queryObj.indicators || !Array.isArray(queryObj.indicators) || queryObj.indicators.length === 0) {
-        if (!queryObj.select || !Array.isArray(queryObj.select)) {
-          return { valid: false, error: 'Multi-indicator intent requires an array of indicators' };
-        }
+      if (!getIndicators(queryObj).length) {
+        return { valid: false, error: 'Multi-indicator intent requires an array of indicators' };
       }
       break;
 
@@ -170,6 +181,12 @@ export function validateJanDataQuery(queryObj) {
       if (!queryObj.structured || !queryObj.semantic) {
         return { valid: false, error: 'Intent "hybrid" requires both "structured" and "semantic" sub-queries' };
       }
+      if (!validateJanDataQuery(queryObj.structured).valid) {
+        return { valid: false, error: 'Hybrid structured query is invalid' };
+      }
+      if (queryObj.semantic.intent !== 'semantic_search' || !queryObj.semantic.query) {
+        return { valid: false, error: 'Hybrid semantic query must be a semantic_search query' };
+      }
       break;
 
     default:
@@ -177,4 +194,11 @@ export function validateJanDataQuery(queryObj) {
   }
 
   return { valid: true, query: queryObj };
+}
+
+function getIndicators(queryObj) {
+  const indicators = queryObj.indicators || queryObj.select;
+  return Array.isArray(indicators)
+    ? indicators.filter((indicator) => typeof indicator === 'string' && indicator.trim())
+    : [];
 }
